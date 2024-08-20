@@ -1,0 +1,28 @@
+img {
+  width: 150px !important;
+  height: 150px !important;
+}
+
+#uploadIcon {
+  color: rgb(180, 168, 144) !important;
+}
+
+tr td img {
+  width: 70px !important;
+  height: 70px !important;
+}
+
+.modal-dialog {
+  max-width: 605px !important;
+  margin: 1.75rem auto;
+}
+
+.datepick {
+  position: relative !important;
+  z-index: 999;
+}
+
+#ndp-nepali-box {
+  top: 60px !important;
+  left: 10px !important;
+}/*# sourceMappingURL=main.css.map */

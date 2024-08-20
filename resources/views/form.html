@@ -1,0 +1,266 @@
+<style>
+    .ql-container {
+        height: 200px;
+    }
+
+    .ql-editor {
+        min-height: 100% !important;
+    }
+
+    input[type="file"] {
+        display: block;
+    }
+
+    .imageThumb {
+        max-height: 75px;
+        border: 2px solid;
+        margin-left: 10px;
+        margin-bottom: 3px;
+        padding: 1px;
+        cursor: pointer;
+    }
+
+    .pip {
+        display: inline-block;
+        margin: 10px 10px 0 0;
+    }
+
+
+    .cropper-container {
+        width: 100% !important;
+    }
+
+    .modal-header {
+        position: relative;
+    }
+
+    .modal-header .closeCrop {
+        position: absolute;
+        top: 13px;
+        right: 15px;
+    }
+
+    label#thumbnail_image-error {
+        position: absolute;
+        top: 9rem !important
+    }
+
+    #ndp-nepali-box {
+        top: 60px !important;
+        left: 10px !important;
+    }
+
+    input#nepali-datepicker {
+        width: 100% !important;
+        height: 50% !important;
+        border-radius: 0.2rem !important;
+        border: 0.1px solid rgb(236, 231, 231);
+        padding-left: 0.5rem !important;
+    }
+</style>
+@if ($type == 'error')
+<div class="modal-header">
+    <h1 class="modal-title fs-5" id="staticBackdropLabel">
+        Error
+    </h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    {{ $message }}
+</div>
+@else
+<div class="modal-header">
+    <h1 class="modal-title fs-5" id="staticBackdropLabel">
+        {{ !empty(@$prevPost->id) ? 'Update Existing Post Details' : 'Add New Post'}}
+    </h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <form action="{{ route('admin.post.save') }}" method="POST" id="postForm" enctype="multipart/form-data">
+
+        <div class="row mb-3">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                <label for="title" class="form-label">Title <span class="required-field">*</span></label>
+                <input type="text" class="form-control" id="title" name="title" placeholder="Enter title..." value="{{ @$prevPost->title }}">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6">
+                <input type="hidden" name="id" id="id" value="{{ @$prevPost->id }}">
+                <label for="category" class="form-label">Category <span class="required-field">*</span></label>
+                <select class="form-control" id="category" name="category">
+                    <option selected disabled>Select Category</option>
+                    <option value="blog" {{ !empty($prevPost->category) && $prevPost->category === 'blog' ? 'selected' : '' }}>Blog</option>
+                    <option value="news" {{ !empty($prevPost->category) && $prevPost->category === 'news' ? 'selected' : '' }}>News</option>
+                </select>
+            </div>
+
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6">
+                <label for="order_number" class="form-label">News/Blog Order <span class="required-field">*</span></label>
+                <input type="text" class="form-control" id="order_number" name="order_number" placeholder="Enter news / blog order..." value="{{ @$prevPost->order_number }}">
+            </div>
+        </div>
+
+        <div class="row mt-2" style="display: none" id="show_event_date_address">
+
+            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 datepick">
+                <label for="event_date" class="form-label">Event Date <span class="required-field">*</span></label>
+                <p>
+                    <input type="text" id="nepali-datepicker" name="" placeholder="Select Event Date">
+                </p>
+            </div>
+            <div class="col-xl-9 col-lg-9 col-md-9 col-sm-9">
+                <label for="title" class="form-label">Event Address <span class="required-field">*</span></label>
+                <input type="text" class="form-control" id="" name="" placeholder="Enter event address...">
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                <label for="details" class="form-label">Details <span class="required-field">*</span></label>
+                <!-- Quill Editor Container -->
+                <div id="details" name="details">{!! @$prevPost->details !!}</div>
+                <input type="hidden" name="details" id="quill-content">
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                <div class="row">
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                        <label for="image">Feature Image <span class="required-field">*</span></label>
+                        <div class="relative" id="edit-image">
+                            <div class="profile-user">
+                                <label for="thumbnail_image" class="fe fe-camera profile-edit text-primary absolute"></label>
+                            </div>
+                            <input type="file" class="thumbnail_image" id="thumbnail_image" style="position: absolute; clip: rect(0, 0, 0, 0); pointer-events: none;" accept="image/*" name="image">
+                            <input type="hidden" class="form-control croppedImg" id="croppedImg" name="croppedImg">
+
+                            <div class="img-rectangle mt-2">
+                                <?php
+                                $photo = asset("images/no-image.jpg");
+                                if (!empty(@$prevPost->image)) {
+                                    $photo = asset("storage/post/" . $prevPost->image);
+                                }
+                                ?>
+                                <img src="{{ $photo }}" alt="Default Image" id="img_introduction" class="_image">
+                            </div>
+                        </div>
+                        <div class="row mt-4 ms-1">
+                            <p class="p-0 m-0">Accepted Format :<span class="text-muted"> jpg/jpeg/png</span></p>
+                            <p class="p-0 m-0">File size :<span class="text-muted"> (300x475) in pixels</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    <button type="button" class="btn btn-primary saveNews"><i class="fa fa-save"></i>
+        @if (empty($prevPost->id))
+        Save
+        @else
+        Update
+        @endif
+    </button>
+</div>
+@endif
+<script>
+    $(document).ready(function() {
+        showDatePicker();
+        var quill = new Quill('#details', {
+            theme: 'snow'
+        });
+        // $("#datetime").datepicker();
+
+        $('#thumbnail_image').on('change', function(event) {
+            const selectedFile = event.target.files[0];
+
+            if (selectedFile) {
+                $('._image').attr('src', URL.createObjectURL(selectedFile));
+            }
+        });
+
+
+        $('#postForm').validate({
+            rules: {
+                category: "required",
+                title: "required",
+                event_date: "required",
+                event_address: "required",
+                details: "required",
+                order_number: "required",
+                image: {
+                    required: function() {
+                        var id = $('#id').val();
+                        return id === '';
+                    }
+                },
+            },
+            messages: {
+                category: {
+                    required: "Please select category."
+                },
+                title: {
+                    required: "Please enter title of post.."
+                },
+
+                details: {
+                    required: "Please enter details of post.."
+                },
+                order_number: {
+                    required: "Please enter order of post.."
+                },
+                image: {
+                    required: "Please select feature image."
+                },
+            },
+            highlight: function(element) {
+                $(element).addClass('border-danger')
+            },
+            unhighlight: function(element) {
+                $(element).removeClass('border-danger')
+            },
+        });
+
+
+        // Save post
+        $('.saveNews').off('click');
+        $('.saveNews').on('click', function() {
+            if ($('#postForm').valid()) {
+                showLoader();
+
+                // Get content from Quill editor
+                var details = quill.root.innerHTML;
+                $('#postForm').find('#quill-content').val(details);
+
+                // Submit the form using AJAX
+                $('#postForm').ajaxSubmit({
+                    success: function(response) {
+                        if (response) {
+                            if (response.type === 'success') {
+                                showNotification(response.message, 'success');
+                                postTable.draw();
+                                $('#postForm')[0].reset();
+                                $('#id').val('');
+                                $('#postModal').modal('hide');
+                            } else {
+                                showNotification(response.message, 'error');
+                                hideLoader();
+                            }
+                        }
+                        hideLoader();
+                    },
+                    error: function(xhr) {
+                        hideLoader();
+                        var response = xhr.responseJSON;
+                        showNotification(response && response.message ? response.message : 'An error occurred', 'error');
+                    }
+                });
+
+            }
+        });
+        $('#category').trigger('change');
+    });
+</script>
